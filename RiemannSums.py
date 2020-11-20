@@ -1,14 +1,16 @@
 from tkinter import *
+from tkinter import ttk
 import math as m
 from sympy import *
 from PIL import ImageTk,Image 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
+
+matplotlib.use("TkAgg") #imports tkinter module for matplotlib
 
 #Graph Variables
 GraphEquation = ''
@@ -27,6 +29,9 @@ equation =""
 class optionsOfSums(enum.Enum):
     Left = 0
     Right = 1
+
+#btnStyle.map('TButton', foreground = [('active', '! disabled', 'green')], 
+                     #background = [('active', 'black')]) 
 
 #Calculates y-value of function
 def RectCaluclator(giv):
@@ -75,20 +80,24 @@ def findVerticalAsymptotes(): #finds the vertical asymptotes that are limits to 
             nonallowed.append(s)    # appends all solutions to the not allowed array(to prevent infinite areas)
     return nonallowed               #returns all non allowed domains
 def callback(P):        #limits inputs of certain text inputs to numbers(neg and pos)
+    P = P.replace('.','',1)
+    return RecallBack(P) 
+def IntCallback(P): #no
+    return RecallBack(P)
+def RecallBack(P):
     if str.isdigit(P[1:]) or P[1:] =="" :
         if P == "" or str.isdigit(P[0]) or P[0] in ["-"]:
             return True
         return False
     else:
-        return False    
-
+        return False  
 def Riemmanstuff(): #Main calculations
     global equation #makes sure equation is the equation
     try:            #attempts to calculate, will fail(try here to prevent code from dying)
         equation        = str(equationFunctionInput.get())  #obtains equation from equation input box
         numberOfRect    = int(amountOfRectangles.get())     #obtains the amount of rectangles to draw
-        interval[0]     = int(leftIntervalInput.get())      #obtains first part of interval
-        interval[1]     = int(rightIntervalInput.get())     #obtains second part of interval
+        interval[0]     = float(leftIntervalInput.get())      #obtains first part of interval
+        interval[1]     = float(rightIntervalInput.get())     #obtains second part of interval
         GraphInterval   = [interval[0],interval[1]]         #creates the graph interval, also not needed
         GraphEquation   = equation                          #not really needed, but its cool
 
@@ -138,22 +147,30 @@ root = Tk()
 #canvas
 canvas = FigureCanvasTkAgg(mainGraph, master=root)
 toolbar = NavigationToolbar2Tk(canvas, root)
+toolbar.children['!button4'].pack_forget()
+toolbar.children['!button5'].pack(side='right')
 
 vcmd = (root.register(callback)) #gets inputs for certain text inputs(to limit)
+intOwn = (root.register(IntCallback))
 root.geometry("1200x800")
 root.title("Riemann sum calculator")
+root.configure(background='white')
 
-#Widgets
-SubTitle = Label(root, text="Riemann sum calculator", font=("Courier", 10))
+#Styles Stuff
+btnStyle = ttk.Style()
+btnStyle.configure('MD.TButton', font = 
+               ('calibri', 20, 'normal'), 
+                    borderwidth = '0') 
+                    
+#Widgets(creation and display)
+SubTitle = ttk.Label(root, text="Riemann Sum Calculator",background='white' ,font=("Courier", 30))
 typeTitle = Label(root, text="Type/Starting point")
 numOfRectTitle = Label(root, text="How many rectangles to calculate?")
 resultShower = Label(root, text="Feed me information!", fg='red',bg='white', font=("Courier", 15)) #shows result
 
-calculateButton = Button(root, text="Calculate!", padx=150, command=Riemmanstuff)
+calculateButton = ttk.Button(root, style="MD.TButton",text="Calculate!", command=Riemmanstuff)
 
-equationFunctionInput = Entry(root,fg="red")
-equationFunctionInput.pack()
-#intervalInputRange = Entry
+equationFunctionInput = ttk.Entry(root)
 
 
 intervalFrame = Frame(root)
@@ -165,7 +182,7 @@ rightIntervalInput      = Entry(intervalFrame, width=5, validate = 'all', valida
 rightIntervalInput.pack(side=LEFT)
 
 
-amountOfRectangles = Entry(root, validate = 'all', validatecommand=(vcmd, '%P')) #validatecommand and validate limit input to digits
+amountOfRectangles = Entry(root, validate = 'all', validatecommand=(intOwn, '%P')) #validatecommand and validate limit input to digits
 calculateEquation = Entry(root, validate = 'all', validatecommand=(vcmd, '%P'))
 
 #Radio buttons
@@ -179,6 +196,7 @@ invervalFrame = Frame(root)
 
 #Display stuff
 SubTitle.pack(anchor='n')
+equationFunctionInput.pack(anchor='n')
 typeTitle.pack(anchor='n')
 
 
